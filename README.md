@@ -12,6 +12,17 @@ The bundled sample is **江南与蜀道 / Jiangnan & the Shu Roads** — a nine-
 
 ![Waypoints preview](public/og.jpg)
 
+### Deployed here
+
+| | |
+|---|---|
+| Repository | https://github.com/DerekHam/waypoints |
+| Public site | https://waypoints.derekhan.link |
+| Editing API | https://api.waypoints.derekhan.link |
+| Worker fallback URL | https://waypoints-api.derekham.workers.dev |
+
+The `VITE_API_BASE` Actions variable points at the API custom domain. The API domain is a Cloudflare Workers custom domain; it is managed in Cloudflare rather than `wrangler.toml`, so recreate it if the Worker itself is ever recreated. Route/station/timetable caching and login rate limiting use the `WAYPOINTS_KV` namespace bound in `wrangler.toml`.
+
 ---
 
 ## Quick start
