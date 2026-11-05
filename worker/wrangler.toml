@@ -10,10 +10,7 @@ ATLAS_PATH = "public/data/atlas.json"
 SITE_ORIGINS = "https://waypoints.derekhan.link,http://localhost:5173,http://127.0.0.1:5173,http://localhost:4173"
 PUBLIC_ORIGIN = "https://waypoints.derekhan.link"
 
-# Optional but recommended: create a KV namespace for route/station/timetable
-# caching and login rate limiting.
-#   npx wrangler kv namespace create WAYPOINTS_KV
-# Then uncomment these lines and paste the returned id.
-# [[kv_namespaces]]
-# binding = "WAYPOINTS_KV"
-# id = "REPLACE_WITH_KV_NAMESPACE_ID"
+# KV powers route/station/timetable caching and login rate limiting.
+[[kv_namespaces]]
+binding = "WAYPOINTS_KV"
+id = "35d52af7b8a94dc2a231ceccac8f4e2b"
