@@ -1,0 +1,1035 @@
+{
+  "version": 1,
+  "updatedAt": "2026-11-05T16:31:14.888Z",
+  "lastEditedBy": "Derek",
+  "journeys": [
+    {
+      "id": "jiangnan-shu-roads",
+      "title": "Jiangnan & the Shu Roads",
+      "titleZh": "江南与蜀道",
+      "subtitle": "Canals, yellow mountains, river cities and the old road into Sichuan.",
+      "subtitleZh": "水巷、黄山、江城的雾，与通往四川的旧路。",
+      "note": "A slow month of water towns, cloud seas, teahouses and night trains. Fast rail where it helps; long afternoons where it does not.",
+      "noteZh": "用一个慢月，走水乡、云海、茶馆与夜车。能坐高铁的地方坐高铁，该慢下来的地方就慢下来。",
+      "color": "terracotta",
+      "stops": [
+        {
+          "id": "shanghai",
+          "name": "Shanghai",
+          "nameZh": "上海",
+          "region": "Shanghai",
+          "regionZh": "上海",
+          "country": "China",
+          "countryZh": "中国",
+          "lat": 31.2304,
+          "lon": 121.4737,
+          "arrive": "2027-04-03",
+          "depart": "2027-04-05",
+          "note": "Long breakfasts in the French Concession, then the Bund at dusk. Start slowly; the trip has a lot of moving parts ahead.",
+          "noteZh": "在法租界吃一顿漫长的早饭，傍晚沿外滩散步。先慢一点，后面的路还很长。",
+          "links": [
+            {
+              "label": "Shanghai tourism",
+              "labelZh": "上海旅游",
+              "url": "https://www.meet-in-shanghai.net/"
+            }
+          ]
+        },
+        {
+          "id": "suzhou",
+          "name": "Suzhou",
+          "nameZh": "苏州",
+          "region": "Jiangsu",
+          "regionZh": "江苏",
+          "country": "China",
+          "countryZh": "中国",
+          "lat": 31.2989,
+          "lon": 120.5853,
+          "arrive": "2027-04-05",
+          "depart": "2027-04-07",
+          "note": "Gardens in the morning, canals in the afternoon, and a day lost in the Pingjiang Road lanes.",
+          "noteZh": "上午看园林，下午坐船，剩下的时间在平江路的小巷里迷路。",
+          "links": [
+            {
+              "label": "Classical gardens of Suzhou",
+              "labelZh": "苏州古典园林",
+              "url": "https://whc.unesco.org/en/list/813/"
+            }
+          ]
+        },
+        {
+          "id": "hangzhou",
+          "name": "Hangzhou",
+          "nameZh": "杭州",
+          "region": "Zhejiang",
+          "regionZh": "浙江",
+          "country": "China",
+          "countryZh": "中国",
+          "lat": 30.2741,
+          "lon": 120.1551,
+          "arrive": "2027-04-07",
+          "depart": "2027-04-10",
+          "note": "West Lake before the crowds. In the afternoon, take the bus into the Longjing tea hills and walk back down through the villages.",
+          "noteZh": "趁人少去看西湖。下午坐车去龙井的茶山，再从村子里慢慢走下来。",
+          "links": [
+            {
+              "label": "West Lake",
+              "labelZh": "西湖",
+              "url": "https://whc.unesco.org/en/list/1334/"
+            }
+          ]
+        },
+        {
+          "id": "huangshan",
+          "name": "Huangshan",
+          "nameZh": "黄山",
+          "region": "Anhui",
+          "regionZh": "安徽",
+          "country": "China",
+          "countryZh": "中国",
+          "lat": 30.134,
+          "lon": 118.167,
+          "arrive": "2027-04-10",
+          "depart": "2027-04-12",
+          "note": "Two nights on the mountain for a sunrise above the cloud sea. Pack light and expect stone steps.",
+          "noteZh": "在山顶住两晚，等云海上的日出。行李要轻，石阶很多。",
+          "links": [
+            {
+              "label": "Mount Huangshan",
+              "labelZh": "黄山",
+              "url": "https://whc.unesco.org/en/list/547/"
+            }
+          ]
+        },
+        {
+          "id": "wuhan",
+          "name": "Wuhan",
+          "nameZh": "武汉",
+          "region": "Hubei",
+          "regionZh": "湖北",
+          "country": "China",
+          "countryZh": "中国",
+          "lat": 30.5928,
+          "lon": 114.3055,
+          "arrive": "2027-04-12",
+          "depart": "2027-04-14",
+          "note": "The Yangtze, a bowl of hot dry noodles, and the Hubei Provincial Museum. Cross the river just for the view back.",
+          "noteZh": "看长江，吃一碗热干面，去湖北省博物馆。过江只是为了回头看。",
+          "links": [
+            {
+              "label": "Yellow Crane Tower",
+              "labelZh": "黄鹤楼",
+              "url": "https://en.wikipedia.org/wiki/Yellow_Crane_Tower"
+            }
+          ]
+        },
+        {
+          "id": "chongqing",
+          "name": "Chongqing",
+          "nameZh": "重庆",
+          "region": "Chongqing",
+          "regionZh": "重庆",
+          "country": "China",
+          "countryZh": "中国",
+          "lat": 29.563,
+          "lon": 106.5516,
+          "arrive": "2027-04-14",
+          "depart": "2027-04-17",
+          "note": "A city of stairs, monorails and night crossings. Eat hotpot once, then find the small noodle shops on the back streets.",
+          "noteZh": "阶梯、轻轨，还有夜晚过江的轮渡。吃一次火锅，再去背街找小面馆。",
+          "links": [
+            {
+              "label": "Hongya Cave",
+              "labelZh": "洪崖洞",
+              "url": "https://en.wikipedia.org/wiki/Hongya_Cave"
+            }
+          ]
+        },
+        {
+          "id": "chengdu",
+          "name": "Chengdu",
+          "nameZh": "成都",
+          "region": "Sichuan",
+          "regionZh": "四川",
+          "country": "China",
+          "countryZh": "中国",
+          "lat": 30.5728,
+          "lon": 104.0668,
+          "arrive": "2027-04-17",
+          "depart": "2027-04-21",
+          "note": "Teahouses, pandas, and the slowest afternoons of the trip. Leave one day completely unplanned.",
+          "noteZh": "茶馆、熊猫，还有整趟旅程里最慢的下午。留一整天什么都不安排。",
+          "links": [
+            {
+              "label": "Panda base",
+              "labelZh": "大熊猫繁育研究基地",
+              "url": "https://en.wikipedia.org/wiki/Chengdu_Research_Base_of_Giant_Panda_Breeding"
+            }
+          ]
+        },
+        {
+          "id": "xian",
+          "name": "Xi'an",
+          "nameZh": "西安",
+          "region": "Shaanxi",
+          "regionZh": "陕西",
+          "country": "China",
+          "countryZh": "中国",
+          "lat": 34.3416,
+          "lon": 108.9398,
+          "arrive": "2027-04-21",
+          "depart": "2027-04-24",
+          "note": "City walls at dusk, noodles in the Muslim Quarter, and a day trip to the Terracotta Army.",
+          "noteZh": "傍晚在城墙上骑车，去回民街吃面，留一天去看兵马俑。",
+          "links": [
+            {
+              "label": "Terracotta Army",
+              "labelZh": "兵马俑",
+              "url": "https://whc.unesco.org/en/list/441/"
+            }
+          ]
+        },
+        {
+          "id": "beijing",
+          "name": "Beijing",
+          "nameZh": "北京",
+          "region": "Beijing",
+          "regionZh": "北京",
+          "country": "China",
+          "countryZh": "中国",
+          "lat": 39.9042,
+          "lon": 116.4074,
+          "arrive": "2027-04-24",
+          "depart": "2027-04-26",
+          "note": "Hutong mornings and a last long walk through the old city. End with dumplings and an early night.",
+          "noteZh": "在胡同里过几个早晨，最后沿着老城走很久。用一顿饺子和一个早睡的夜晚收尾。",
+          "links": [
+            {
+              "label": "Forbidden City",
+              "labelZh": "故宫",
+              "url": "https://whc.unesco.org/en/list/439/"
+            }
+          ]
+        }
+      ],
+      "legs": [
+        {
+          "mode": "train",
+          "route": {
+            "provider": "openrailrouting",
+            "points": [
+              [
+                121.4737,
+                31.2304
+              ],
+              [
+                121.0833,
+                31.3401
+              ],
+              [
+                120.9963,
+                31.3358
+              ],
+              [
+                120.8744,
+                31.3822
+              ],
+              [
+                120.6067,
+                31.3318
+              ],
+              [
+                120.5853,
+                31.2989
+              ]
+            ],
+            "distanceKm": 93.3,
+            "status": "routed"
+          },
+          "connection": null
+        },
+        {
+          "mode": "train",
+          "route": {
+            "provider": "openrailrouting",
+            "points": [
+              [
+                120.5853,
+                31.2989
+              ],
+              [
+                120.6067,
+                31.3318
+              ],
+              [
+                120.8721,
+                31.3824
+              ],
+              [
+                120.9962,
+                31.3358
+              ],
+              [
+                121.0815,
+                31.3403
+              ],
+              [
+                121.253,
+                31.2934
+              ],
+              [
+                121.3126,
+                31.2213
+              ],
+              [
+                121.3613,
+                31.0915
+              ],
+              [
+                121.1663,
+                30.9352
+              ],
+              [
+                121.004,
+                30.856
+              ],
+              [
+                120.8289,
+                30.709
+              ],
+              [
+                120.671,
+                30.6244
+              ],
+              [
+                120.6022,
+                30.5539
+              ],
+              [
+                120.2198,
+                30.3417
+              ],
+              [
+                120.184,
+                30.3127
+              ],
+              [
+                120.1783,
+                30.246
+              ],
+              [
+                120.1551,
+                30.2741
+              ]
+            ],
+            "distanceKm": 252.4,
+            "status": "routed"
+          },
+          "connection": null
+        },
+        {
+          "mode": "train",
+          "route": {
+            "provider": "openrailrouting",
+            "points": [
+              [
+                120.1551,
+                30.2741
+              ],
+              [
+                120.1783,
+                30.246
+              ],
+              [
+                120.1828,
+                30.3303
+              ],
+              [
+                120.0927,
+                30.4532
+              ],
+              [
+                120.0341,
+                30.6276
+              ],
+              [
+                120.013,
+                30.8928
+              ],
+              [
+                119.8987,
+                30.8902
+              ],
+              [
+                119.7061,
+                30.8214
+              ],
+              [
+                119.5855,
+                30.8193
+              ],
+              [
+                119.133,
+                30.9429
+              ],
+              [
+                118.8238,
+                30.9199
+              ],
+              [
+                118.7748,
+                30.9449
+              ],
+              [
+                118.8685,
+                30.88
+              ],
+              [
+                118.9294,
+                30.7889
+              ],
+              [
+                118.942,
+                30.6384
+              ],
+              [
+                118.8725,
+                30.4427
+              ],
+              [
+                118.6624,
+                30.1598
+              ],
+              [
+                118.4654,
+                30.0145
+              ],
+              [
+                118.4224,
+                29.9406
+              ],
+              [
+                118.2673,
+                29.8184
+              ],
+              [
+                118.167,
+                30.134
+              ]
+            ],
+            "distanceKm": 396.8,
+            "status": "routed"
+          },
+          "connection": null
+        },
+        {
+          "mode": "train",
+          "route": {
+            "provider": "openrailrouting",
+            "points": [
+              [
+                118.167,
+                30.134
+              ],
+              [
+                118.2673,
+                29.8184
+              ],
+              [
+                118.2156,
+                29.8037
+              ],
+              [
+                118.0053,
+                29.9062
+              ],
+              [
+                118.086,
+                30.3274
+              ],
+              [
+                118.0474,
+                30.4078
+              ],
+              [
+                117.8866,
+                30.5746
+              ],
+              [
+                117.7797,
+                30.6269
+              ],
+              [
+                117.625,
+                30.6365
+              ],
+              [
+                117.0719,
+                30.5497
+              ],
+              [
+                116.9825,
+                30.5748
+              ],
+              [
+                116.9621,
+                30.649
+              ],
+              [
+                116.917,
+                30.6831
+              ],
+              [
+                116.8237,
+                30.6659
+              ],
+              [
+                116.5768,
+                30.5631
+              ],
+              [
+                116.3807,
+                30.434
+              ],
+              [
+                116.14,
+                30.1203
+              ],
+              [
+                116.0178,
+                30.1017
+              ],
+              [
+                115.9246,
+                30.0271
+              ],
+              [
+                115.7191,
+                29.9999
+              ],
+              [
+                115.5826,
+                30.0389
+              ],
+              [
+                115.3458,
+                30.2511
+              ],
+              [
+                115.2806,
+                30.3631
+              ],
+              [
+                115.1635,
+                30.4897
+              ],
+              [
+                115.0443,
+                30.5528
+              ],
+              [
+                114.9479,
+                30.4889
+              ],
+              [
+                114.8144,
+                30.5366
+              ],
+              [
+                114.7597,
+                30.5303
+              ],
+              [
+                114.7122,
+                30.4929
+              ],
+              [
+                114.6357,
+                30.4928
+              ],
+              [
+                114.4617,
+                30.5325
+              ],
+              [
+                114.419,
+                30.6099
+              ],
+              [
+                114.3055,
+                30.5928
+              ]
+            ],
+            "distanceKm": 578.4,
+            "status": "routed"
+          },
+          "connection": null
+        },
+        {
+          "mode": "train",
+          "route": {
+            "provider": "openrailrouting",
+            "points": [
+              [
+                114.3055,
+                30.5928
+              ],
+              [
+                114.419,
+                30.6099
+              ],
+              [
+                114.3578,
+                30.713
+              ],
+              [
+                114.3288,
+                30.6427
+              ],
+              [
+                114.1072,
+                30.6041
+              ],
+              [
+                114.008,
+                30.6385
+              ],
+              [
+                113.9457,
+                30.7175
+              ],
+              [
+                113.5412,
+                30.7293
+              ],
+              [
+                113.3188,
+                30.6949
+              ],
+              [
+                113.1882,
+                30.7036
+              ],
+              [
+                113.0846,
+                30.7451
+              ],
+              [
+                112.6567,
+                31.0397
+              ],
+              [
+                112.3462,
+                31.0932
+              ],
+              [
+                112.2297,
+                31.0947
+              ],
+              [
+                112.1514,
+                31.069
+              ],
+              [
+                112.0458,
+                30.9178
+              ],
+              [
+                111.4296,
+                30.7449
+              ],
+              [
+                111.1848,
+                30.9247
+              ],
+              [
+                111.035,
+                31.1229
+              ],
+              [
+                110.8281,
+                31.2161
+              ],
+              [
+                110.7665,
+                31.3427
+              ],
+              [
+                110.5543,
+                31.1781
+              ],
+              [
+                110.3286,
+                31.1531
+              ],
+              [
+                110.1614,
+                31.1646
+              ],
+              [
+                110.0088,
+                31.1135
+              ],
+              [
+                109.7627,
+                31.1618
+              ],
+              [
+                109.4927,
+                31.0467
+              ],
+              [
+                109.1858,
+                30.9905
+              ],
+              [
+                108.8508,
+                30.9774
+              ],
+              [
+                108.6963,
+                30.9993
+              ],
+              [
+                108.2554,
+                30.8313
+              ],
+              [
+                108.109,
+                30.7462
+              ],
+              [
+                107.9057,
+                30.7411
+              ],
+              [
+                107.7083,
+                30.6074
+              ],
+              [
+                107.3055,
+                30.2558
+              ],
+              [
+                107.2029,
+                30.0987
+              ],
+              [
+                107.1839,
+                29.9288
+              ],
+              [
+                107.1093,
+                29.886
+              ],
+              [
+                106.9892,
+                29.8673
+              ],
+              [
+                106.8645,
+                29.6811
+              ],
+              [
+                106.7819,
+                29.6532
+              ],
+              [
+                106.6182,
+                29.6435
+              ],
+              [
+                106.5473,
+                29.6123
+              ],
+              [
+                106.5516,
+                29.563
+              ]
+            ],
+            "distanceKm": 939.2,
+            "status": "routed"
+          },
+          "connection": null
+        },
+        {
+          "mode": "train",
+          "route": {
+            "provider": "openrailrouting",
+            "points": [
+              [
+                106.5516,
+                29.563
+              ],
+              [
+                106.5473,
+                29.6123
+              ],
+              [
+                106.4436,
+                29.6571
+              ],
+              [
+                106.4257,
+                29.5605
+              ],
+              [
+                106.2536,
+                29.5249
+              ],
+              [
+                106.0658,
+                29.4153
+              ],
+              [
+                105.9115,
+                29.3683
+              ],
+              [
+                105.7206,
+                29.428
+              ],
+              [
+                105.272,
+                29.4745
+              ],
+              [
+                105.1442,
+                29.5571
+              ],
+              [
+                104.8453,
+                29.8218
+              ],
+              [
+                104.757,
+                29.9507
+              ],
+              [
+                104.694,
+                30.109
+              ],
+              [
+                104.5243,
+                30.3475
+              ],
+              [
+                104.2038,
+                30.4929
+              ],
+              [
+                104.1127,
+                30.5996
+              ],
+              [
+                104.1335,
+                30.6217
+              ],
+              [
+                104.0525,
+                30.6095
+              ],
+              [
+                104.0106,
+                30.6289
+              ],
+              [
+                103.9767,
+                30.6985
+              ],
+              [
+                104.0295,
+                30.7391
+              ],
+              [
+                103.9947,
+                30.7352
+              ],
+              [
+                103.9581,
+                30.7765
+              ],
+              [
+                104.0314,
+                30.6711
+              ],
+              [
+                104.1418,
+                30.6298
+              ],
+              [
+                104.0668,
+                30.5728
+              ]
+            ],
+            "distanceKm": 402,
+            "status": "routed"
+          },
+          "connection": null
+        },
+        {
+          "mode": "train",
+          "route": {
+            "provider": "openrailrouting",
+            "points": [
+              [
+                104.0668,
+                30.5728
+              ],
+              [
+                104.1418,
+                30.6298
+              ],
+              [
+                104.0314,
+                30.6711
+              ],
+              [
+                103.9568,
+                30.7742
+              ],
+              [
+                103.9982,
+                30.7343
+              ],
+              [
+                104.0998,
+                30.7613
+              ],
+              [
+                104.1511,
+                30.8549
+              ],
+              [
+                104.2278,
+                30.9282
+              ],
+              [
+                104.2144,
+                30.9421
+              ],
+              [
+                104.2244,
+                30.9011
+              ],
+              [
+                104.3991,
+                31.1967
+              ],
+              [
+                104.5217,
+                31.2938
+              ],
+              [
+                104.6292,
+                31.4228
+              ],
+              [
+                104.7278,
+                31.4678
+              ],
+              [
+                104.7004,
+                31.6857
+              ],
+              [
+                104.7933,
+                31.8181
+              ],
+              [
+                105.0173,
+                31.9273
+              ],
+              [
+                105.275,
+                32.152
+              ],
+              [
+                105.448,
+                32.269
+              ],
+              [
+                105.7987,
+                32.438
+              ],
+              [
+                105.9853,
+                32.6568
+              ],
+              [
+                106.1244,
+                32.7447
+              ],
+              [
+                106.6137,
+                32.9613
+              ],
+              [
+                106.9771,
+                33.0886
+              ],
+              [
+                107.0953,
+                33.1001
+              ],
+              [
+                107.2126,
+                33.1714
+              ],
+              [
+                107.5844,
+                33.2508
+              ],
+              [
+                108.2733,
+                33.682
+              ],
+              [
+                108.4957,
+                33.8564
+              ],
+              [
+                108.5498,
+                33.9709
+              ],
+              [
+                108.6663,
+                34.0381
+              ],
+              [
+                108.693,
+                34.2183
+              ],
+              [
+                108.8104,
+                34.3396
+              ],
+              [
+                108.939,
+                34.3775
+              ],
+              [
+                108.9398,
+                34.3416
+              ]
+            ],
+            "distanceKm": 715.4,
+            "status": "routed"
+          },
+          "connection": null
+        },
+        {
+          "mode": "plane",
+          "route": {
+            "provider": "great-circle",
+            "distanceKm": 905.4,
+            "status": "routed"
+          },
+          "connection": null
+        }
+      ],
+      "createdAt": "2026-11-06T00:00:00.000Z",
+      "updatedAt": "2026-11-06T00:00:00.000Z"
+    }
+  ]
+}

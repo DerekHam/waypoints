@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://waypoints.derekhan.link/sitemap.xml
