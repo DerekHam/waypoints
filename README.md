@@ -70,6 +70,7 @@ The repository is already configured for `DerekHam/waypoints` and `waypoints.der
    ```
 
    The hostname is a subdomain, so a CNAME is the right record. If you use an apex domain instead, use GitHub Pages’ A/AAAA records.
+   If the domain is on Cloudflare, set the record’s proxy status to **DNS only** (grey cloud). An orange-cloud proxy can prevent GitHub from issuing the Pages certificate; you can enable the proxy again after the certificate is issued if you really need it.
 7. Wait for the certificate, then enable **Enforce HTTPS**.
 
 The built site uses a relative base, so it also works at `https://derekham.github.io/waypoints/` before the custom domain is live (GitHub may redirect once a custom domain is configured).
