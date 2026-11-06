@@ -5,6 +5,15 @@ import {
   type RouteGeometry,
   type TransportMode,
 } from '../../shared/atlas'
+import {
+  haversineKm,
+  mergeStations,
+  rankArrivals,
+  rankStationPairs,
+  rankStations,
+  type GeoPoint,
+  type Station,
+} from './stations'
 
 type Env = {
   GITHUB_TOKEN: string
@@ -31,13 +40,6 @@ type Session = {
 }
 
 type RoutePoint = [number, number]
-
-type Station = {
-  name: string
-  nameEn?: string
-  lat: number
-  lon: number
-}
 
 class HttpError extends Error {
   status: number
@@ -349,16 +351,6 @@ async function putRemoteAtlas(
   return { sha: data.content.sha, commitUrl: data.commit?.html_url }
 }
 
-function haversineKm(a: [number, number], b: [number, number]): number {
-  const radius = 6371.0088
-  const dLat = ((b[1] - a[1]) * Math.PI) / 180
-  const dLon = ((b[0] - a[0]) * Math.PI) / 180
-  const lat1 = (a[1] * Math.PI) / 180
-  const lat2 = (b[1] * Math.PI) / 180
-  const h = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2
-  return 2 * radius * Math.asin(Math.min(1, Math.sqrt(h)))
-}
-
 function vector([lon, lat]: RoutePoint): [number, number, number] {
   const phi = ((90 - lat) * Math.PI) / 180
   const theta = ((lon + 180) * Math.PI) / 180
@@ -420,7 +412,7 @@ function simplify(points: RoutePoint[], tolerance = 0.00025, maxPoints = 500): R
   ])
 }
 
-function validatePoint(value: unknown): { lat: number; lon: number; name?: string } {
+function validatePoint(value: unknown): GeoPoint {
   if (!value || typeof value !== 'object') throw new HttpError(400, 'bad_point', 'Invalid point')
   const point = value as Record<string, unknown>
   const lat = Number(point.lat)
@@ -435,6 +427,7 @@ function validatePoint(value: unknown): { lat: number; lon: number; name?: strin
     lat,
     lon,
     ...(typeof point.name === 'string' ? { name: point.name.slice(0, 160) } : {}),
+    ...(typeof point.nameZh === 'string' ? { nameZh: point.nameZh.slice(0, 160) } : {}),
   }
 }
 
@@ -510,7 +503,6 @@ async function osrmRoute(
   }
 }
 
-const CJK = /[\u3400-\u9fff]/
 const EXCLUDED_STATION_TYPES = new Set([
   'subway',
   'light_rail',
@@ -518,44 +510,18 @@ const EXCLUDED_STATION_TYPES = new Set([
   'tram',
   'funicular',
 ])
-
-function normaliseName(value: string): string {
-  return value
-    .toLowerCase()
-    .replace(/站|车站|火车站|railway|station/g, '')
-    .replace(/[\s·・.,'’()（）\-_/]/g, '')
-    .replace(/市$/, '')
-}
-
-function chooseStation(
-  candidates: Station[],
-  target: { name?: string; lat: number; lon: number },
-): Station | null {
-  let best: { station: Station; score: number } | null = null
-  const targetName = target.name ? normaliseName(target.name) : ''
-  for (const station of candidates) {
-    const distance = haversineKm([target.lon, target.lat], [station.lon, station.lat])
-    if (distance > 60) continue
-    const names = [station.name, station.nameEn]
-      .filter((name): name is string => Boolean(name))
-      .map(normaliseName)
-    const nameMatch =
-      Boolean(targetName) &&
-      names.some(
-        (name) =>
-          Boolean(name) &&
-          (name.includes(targetName) || targetName.includes(name)),
-      )
-    const score = distance - (nameMatch ? 10 : 0)
-    if (!best || score < best.score) best = { station, score }
-  }
-  return best?.station ?? null
-}
+const MAX_STATION_CANDIDATES = 8
+/** Departure stations to test with real rail routing. */
+const MAX_ROUTE_DEPARTURES = 4
+/** Arrival stations to try if the nearest one will not snap to a track. */
+const MAX_ROUTE_ARRIVALS = 3
+/** Departure stations to query for timetables. */
+const MAX_TIMETABLE_DEPARTURES = 2
 
 async function photonStations(query: string): Promise<Station[]> {
   const url = new URL('https://photon.komoot.io/api/')
   url.searchParams.set('q', query)
-  url.searchParams.set('limit', '10')
+  url.searchParams.set('limit', '25')
   url.searchParams.set('osm_tag', 'railway:station')
   const response = await fetchWithTimeout(url.toString(), {
     headers: {
@@ -575,9 +541,9 @@ async function photonStations(query: string): Promise<Station[]> {
   for (const feature of data.features ?? []) {
     const coordinates = feature.geometry?.coordinates
     const properties = feature.properties ?? {}
-    if (!coordinates || properties.osm_key !== 'railway' || properties.osm_value !== 'station') {
-      continue
-    }
+    const value = properties.osm_value
+    if (!coordinates || properties.osm_key !== 'railway') continue
+    if (value !== 'station' && value !== 'halt') continue
     const name = typeof properties.name === 'string' ? properties.name : ''
     if (!name) continue
     const nameEn =
@@ -614,7 +580,7 @@ async function openRailwayMapStations(query: string): Promise<Station[]> {
     if (!item?.name || typeof item.latitude !== 'number' || typeof item.longitude !== 'number') {
       continue
     }
-    if (item.railway !== 'station') continue
+    if (item.railway !== 'station' && item.railway !== 'halt') continue
     if (item.subway === 'yes' || item.tram === 'yes') continue
     if (EXCLUDED_STATION_TYPES.has(item.station ?? '')) continue
     stations.push({
@@ -627,85 +593,172 @@ async function openRailwayMapStations(query: string): Promise<Station[]> {
   return stations
 }
 
-async function resolveStation(
-  env: Env,
-  point: { lat: number; lon: number; name?: string },
-): Promise<Station | null> {
+function stationQueries(point: GeoPoint): string[] {
+  const values = [point.nameZh, point.name]
+    .map((name) => name?.trim())
+    .filter((name): name is string => Boolean(name))
+  return [...new Set(values)].slice(0, 2)
+}
+
+/**
+ * All plausible stations for a stop, best first. Cities can have a dozen
+ * stations; the caller decides which pair actually suits the direction of
+ * travel.
+ */
+async function resolveStations(env: Env, point: GeoPoint): Promise<Station[]> {
+  const queries = stationQueries(point)
+  if (!queries.length) return []
   const name = point.name?.trim() ?? ''
-  if (!name) return null
-  const cacheKey = `station:v3:${point.lat.toFixed(2)},${point.lon.toFixed(2)}:${name}`
+  const nameZh = point.nameZh?.trim() ?? ''
+  const cacheKey = `stations:v5:${point.lat.toFixed(2)},${point.lon.toFixed(2)}:${name}|${nameZh}`
   if (env.WAYPOINTS_KV) {
-    const cached = (await env.WAYPOINTS_KV.get(cacheKey, 'json')) as Station | null
-    if (cached) return cached
+    const cached = (await env.WAYPOINTS_KV.get(cacheKey, 'json')) as Station[] | null
+    if (Array.isArray(cached) && cached.length) return cached
   }
 
-  const cleanName = name.replace(/\s+(railway station|station)$/i, '').trim()
-  let candidates: Station[] = []
-  try {
-    candidates = await openRailwayMapStations(cleanName)
-    if (!candidates.length) {
-      candidates = await photonStations(
-        CJK.test(cleanName) ? `${cleanName} 火车站` : `${cleanName} railway station`,
-      )
-    }
-  } catch (error) {
-    console.warn('Station lookup failed', error)
+  const settled = await Promise.allSettled(queries.map((query) => photonStations(query)))
+  const groups: Station[][] = []
+  for (const result of settled) {
+    if (result.status === 'fulfilled') groups.push(result.value)
+    else console.warn('Station lookup failed', result.reason)
   }
-  const station = chooseStation(candidates, point)
-  if (station && env.WAYPOINTS_KV) {
-    await env.WAYPOINTS_KV.put(cacheKey, JSON.stringify(station), {
+  // OpenRailwayMap is a useful second opinion when Photon has nothing, but
+  // querying it every time doubles the latency for little gain.
+  if (groups.every((group) => group.length === 0)) {
+    const fallback = await openRailwayMapStations(queries[0]).catch((error) => {
+      console.warn('OpenRailwayMap lookup failed', error)
+      return []
+    })
+    if (fallback.length) groups.push(fallback)
+  }
+
+  const stations = rankStations(mergeStations(groups), point, MAX_STATION_CANDIDATES)
+  if (env.WAYPOINTS_KV && stations.length) {
+    await env.WAYPOINTS_KV.put(cacheKey, JSON.stringify(stations), {
       expirationTtl: 60 * 60 * 24 * 30,
     })
   }
-  return station
+  return stations
 }
 
-async function resolveStations(
+/** Route between two stations, cached per pair so trying alternatives is cheap. */
+async function cachedRailRoute(
   env: Env,
-  from: { lat: number; lon: number; name?: string },
-  to: { lat: number; lon: number; name?: string },
-): Promise<{ from: Station | null; to: Station | null }> {
-  const [fromStation, toStation] = await Promise.all([
-    resolveStation(env, from),
-    resolveStation(env, to),
+  from: Station,
+  to: Station,
+): Promise<{ distance: number; points: RoutePoint[] }> {
+  const key = `railpair:v2:${from.lat.toFixed(4)},${from.lon.toFixed(4)}:${to.lat.toFixed(4)},${to.lon.toFixed(4)}`
+  if (env.WAYPOINTS_KV) {
+    const cached = (await env.WAYPOINTS_KV.get(key, 'json')) as {
+      distance: number
+      points: RoutePoint[]
+    } | null
+    if (cached?.points?.length) return cached
+  }
+  const path = await orsRoute(env, from, to)
+  if (env.WAYPOINTS_KV) {
+    await env.WAYPOINTS_KV.put(key, JSON.stringify(path), {
+      expirationTtl: 60 * 60 * 24 * 30,
+    })
+  }
+  return path
+}
+
+type StationAttempt = {
+  from: Station
+  to: Station
+  path: { distance: number; points: RoutePoint[] }
+  connectorFrom: number
+  connectorTo: number
+  totalKm: number
+}
+
+/**
+ * Try the best few station pairs and keep the one whose actual track route
+ * (plus the connectors into town) is shortest. This is what distinguishes
+ * Beijing South from Beijing Chaoyang for a given destination.
+ */
+async function bestStationRoute(
+  env: Env,
+  from: GeoPoint,
+  to: GeoPoint,
+): Promise<StationAttempt | null> {
+  const [fromStations, toStations] = await Promise.all([
+    resolveStations(env, from),
+    resolveStations(env, to),
   ])
-  return { from: fromStation, to: toStation }
-}
+  if (!fromStations.length || !toStations.length) return null
 
-async function trainRoute(
-  env: Env,
-  from: { lat: number; lon: number; name?: string },
-  to: { lat: number; lon: number; name?: string },
-): Promise<RouteGeometry> {
-  const stations = await resolveStations(env, from, to)
-  let path: { distance: number; points: RoutePoint[] } | null = null
-  let usedStations = false
-  if (stations.from && stations.to) {
-    try {
-      path = await orsRoute(env, stations.from, stations.to)
-      usedStations = true
-    } catch (error) {
-      console.warn('Station rail route failed', error)
+  // Snapping a geocoded station node to the rail graph can land on a siding
+  // that is not connected to the main network. If every route to the nearest
+  // arrival station fails, try the next one.
+  for (const arrival of rankArrivals(toStations, to, MAX_ROUTE_ARRIVALS)) {
+    const pairs = rankStationPairs(fromStations, [arrival], from, to, {
+      fromCount: MAX_ROUTE_DEPARTURES,
+      toCount: 1,
+    })
+    if (!pairs.length) continue
+
+    const settled = await Promise.allSettled(
+      pairs.map(async (pair): Promise<StationAttempt> => {
+        const connectorFrom = haversineKm([from.lon, from.lat], [pair.from.lon, pair.from.lat])
+        const connectorTo = haversineKm([to.lon, to.lat], [pair.to.lon, pair.to.lat])
+        const path = await cachedRailRoute(env, pair.from, pair.to)
+        return {
+          from: pair.from,
+          to: pair.to,
+          path,
+          connectorFrom,
+          connectorTo,
+          totalKm: path.distance / 1000 + connectorFrom + connectorTo,
+        }
+      }),
+    )
+
+    const attempts: StationAttempt[] = []
+    for (const result of settled) {
+      if (result.status === 'fulfilled') attempts.push(result.value)
+      else console.warn('Candidate station route failed', result.reason)
+    }
+    if (attempts.length) {
+      attempts.sort((a, b) => a.totalKm - b.totalKm)
+      return attempts[0]
     }
   }
-  if (!path) {
-    path = await orsRoute(env, from, to)
-  }
-  if (!path) throw new HttpError(422, 'route_unavailable', 'No rail path was found')
+  return null
+}
 
-  let points = path.points
-  let distance = path.distance / 1000
-  if (usedStations && stations.from && stations.to) {
-    const fromConnector = haversineKm([from.lon, from.lat], [stations.from.lon, stations.from.lat])
-    const toConnector = haversineKm([to.lon, to.lat], [stations.to.lon, stations.to.lat])
-    distance += fromConnector + toConnector
-    points = [[from.lon, from.lat], ...points, [to.lon, to.lat]]
+async function trainRoute(env: Env, from: GeoPoint, to: GeoPoint): Promise<RouteGeometry> {
+  let stations: StationAttempt | null = null
+  try {
+    stations = await bestStationRoute(env, from, to)
+  } catch (error) {
+    console.warn('Station selection failed', error)
   }
+
+  if (!stations) {
+    // Fall back to routing from the stop coordinates themselves.
+    const path = await orsRoute(env, from, to)
+    return {
+      provider: 'openrailrouting',
+      points: simplify(path.points),
+      distanceKm: Math.round((path.distance / 1000) * 10) / 10,
+      status: 'routed',
+    }
+  }
+
+  const points: RoutePoint[] = [
+    [from.lon, from.lat],
+    ...stations.path.points,
+    [to.lon, to.lat],
+  ]
   return {
     provider: 'openrailrouting',
     points: simplify(points),
-    distanceKm: Math.round(distance * 10) / 10,
+    distanceKm: Math.round(stations.totalKm * 10) / 10,
     status: 'routed',
+    fromStation: stations.from.name,
+    toStation: stations.to.name,
   }
 }
 
@@ -752,6 +805,36 @@ type TransitItinerary = {
 
 const WALKING_MODES = new Set(['WALK', 'BIKE', 'CAR', 'RENTAL', 'RENTAL_BICYCLE', 'RENTAL_CAR'])
 
+async function transitousPlan(
+  env: Env,
+  from: { lat: number; lon: number },
+  to: { lat: number; lon: number },
+  time: string,
+): Promise<TransitItinerary[]> {
+  const url = new URL(TRANSITOUS_API)
+  url.searchParams.set('fromPlace', `${from.lat},${from.lon}`)
+  url.searchParams.set('toPlace', `${to.lat},${to.lon}`)
+  url.searchParams.set('time', time)
+  url.searchParams.set('numItineraries', '3')
+  url.searchParams.set('maxTransfers', '6')
+  const response = await fetchWithTimeout(url.toString(), {
+    headers: {
+      'User-Agent': USER_AGENT,
+      Referer: env.PUBLIC_ORIGIN ?? 'https://waypoints.derekhan.link/',
+      Accept: 'application/json',
+    },
+  })
+  if (response.status === 400) {
+    // Outside timetable coverage or a time the feed cannot answer.
+    return []
+  }
+  if (!response.ok) {
+    throw new HttpError(502, 'transit_error', `Timetable service returned ${response.status}`)
+  }
+  const data = (await response.json()) as { itineraries?: TransitItinerary[] }
+  return data.itineraries ?? []
+}
+
 async function railConnections(
   env: Env,
   body: Record<string, unknown>,
@@ -772,35 +855,54 @@ async function railConnections(
     if (cached) return cached as RailConnection[]
   }
 
-  // Query station-to-station where possible. City-centre coordinates often
-  // pull in a local metro or bus tail that is not part of the rail journey.
-  const stations = await resolveStations(env, from, to)
-  const queryFrom = stations.from ?? from
-  const queryTo = stations.to ?? to
-  const url = new URL(TRANSITOUS_API)
-  url.searchParams.set('fromPlace', `${queryFrom.lat},${queryFrom.lon}`)
-  url.searchParams.set('toPlace', `${queryTo.lat},${queryTo.lon}`)
-  url.searchParams.set('time', time)
-  url.searchParams.set('numItineraries', '3')
-  url.searchParams.set('maxTransfers', '6')
-  const response = await fetchWithTimeout(url.toString(), {
-    headers: {
-      'User-Agent': USER_AGENT,
-      Referer: env.PUBLIC_ORIGIN ?? 'https://waypoints.derekhan.link/',
-      Accept: 'application/json',
-    },
+  // Query the most plausible station pairs rather than a single station per
+  // city: stations in the same city serve different directions. Using the
+  // stations (not city centres) also avoids a local metro/bus tail.
+  const [fromStations, toStations] = await Promise.all([
+    resolveStations(env, from),
+    resolveStations(env, to),
+  ])
+  const pairs = rankStationPairs(fromStations, toStations, from, to, {
+    fromCount: MAX_TIMETABLE_DEPARTURES,
+    toCount: 1,
   })
-  if (response.status === 400) {
-    // Outside timetable coverage or a time the feed cannot answer.
-    return []
+  const queries = pairs.length
+    ? pairs.map((pair) => ({
+        from: pair.from as GeoPoint,
+        to: pair.to as GeoPoint,
+        fromName: pair.from.name,
+        toName: pair.to.name,
+      }))
+    : [{ from, to, fromName: from.name ?? '', toName: to.name ?? '' }]
+
+  const settled = await Promise.allSettled(
+    queries.map((query) => transitousPlan(env, query.from, query.to, time)),
+  )
+  const plans: TransitItinerary[][] = []
+  let firstError: unknown = null
+  for (const result of settled) {
+    if (result.status === 'fulfilled') plans.push(result.value)
+    else {
+      firstError ??= result.reason
+      console.warn('Timetable query failed', result.reason)
+    }
   }
-  if (!response.ok) {
-    throw new HttpError(502, 'transit_error', `Timetable service returned ${response.status}`)
+  if (!plans.length) {
+    if (firstError instanceof HttpError) throw firstError
+    throw new HttpError(502, 'transit_error', 'Timetable service is unavailable')
   }
-  const data = (await response.json()) as { itineraries?: TransitItinerary[] }
+
+  const itineraries = plans.flatMap((plan, index) =>
+    plan.map((itinerary) => ({
+      itinerary,
+      fallbackFrom: queries[index].fromName,
+      fallbackTo: queries[index].toName,
+    })),
+  )
+
   const results: RailConnection[] = []
   const seen = new Set<string>()
-  for (const itinerary of data.itineraries ?? []) {
+  for (const { itinerary, fallbackFrom, fallbackTo } of itineraries) {
     if (!itinerary.startTime || !itinerary.endTime) continue
     const legs = (itinerary.legs ?? []).filter(
       (leg) => leg.mode && !WALKING_MODES.has(leg.mode) && leg.from?.name && leg.to?.name,
@@ -820,7 +922,7 @@ async function railConnections(
       .filter((line): line is string => Boolean(line))
     const summary = lines.length
       ? `${lines.slice(0, 2).join(' · ')}${lines.length > 2 ? ' …' : ''}`
-      : `${from.name ?? ''} → ${to.name ?? ''}`.trim()
+      : `${fallbackFrom} → ${fallbackTo}`.trim()
     const depart = formatTimeInZone(departure, timezone)
     const arrive = formatTimeInZone(arrival, arriveTimezone)
     const durationMs = Date.parse(arrival) - Date.parse(departure)
@@ -857,6 +959,7 @@ async function railConnections(
       checkedAt: new Date().toISOString(),
     })
   }
+  results.sort((a, b) => a.depart.localeCompare(b.depart))
   if (env.WAYPOINTS_KV && results.length) {
     await env.WAYPOINTS_KV.put(cacheKey, JSON.stringify(results), { expirationTtl: 60 * 30 })
   }

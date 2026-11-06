@@ -328,7 +328,7 @@ Routes are computed **only while editing** and stored in the atlas. Public views
 | Plane | Great-circle arc |
 | Ferry | Schematic arc |
 
-For rail, the Worker resolves the nearest principal station through the OpenRailwayMap facility API (with Photon as a fallback), routes between the stations, and adds short connectors back to the stop pins. This avoids snapping to disconnected sidings in city centres. Stations and routes are cached in KV for 30 days.
+For rail, the Worker does not assume a city has one station. It resolves up to eight candidates from Photon (with OpenRailwayMap as a fallback), tests the central terminus plus the stations best aligned with the direction of travel, routes each pair on real tracks, and keeps the shortest route. This is why a Beijing→Shanghai leg leaves from Beijing South while Beijing→Harbin leaves from Beijing Chaoyang and Beijing→Xi'an leaves from Beijing West. If the nearest arrival station will not snap to the rail graph, the next one is tried. The chosen stations are stored with the route and shown under the leg. Stations, station pairs and routes are cached in KV for 30 days.
 
 **Timetable examples:** on a train leg, the editor can choose a date and approximate local departure time. The Worker queries Transitous/MOTIS and returns up to three real connections. The chosen summary is stored with the journey, labelled as an example with the date it was checked. Coverage varies by region; the track path is always shown even when timetables are unavailable.
 

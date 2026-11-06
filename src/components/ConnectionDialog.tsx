@@ -59,8 +59,8 @@ export function ConnectionDialog({
     try {
       const result = await findRailConnections(
         session.token,
-        { lat: from.lat, lon: from.lon, name: from.name },
-        { lat: to.lat, lon: to.lon, name: to.name },
+        { lat: from.lat, lon: from.lon, name: from.name, nameZh: from.nameZh },
+        { lat: to.lat, lon: to.lon, name: to.name, nameZh: to.nameZh },
         date,
         time,
         timezone,

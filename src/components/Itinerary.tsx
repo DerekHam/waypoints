@@ -873,6 +873,14 @@ function LegRow({
           ) : null}
         </div>
 
+        {leg.route?.fromStation ? (
+          <p className="leg-stations">
+            {leg.route.fromStation}
+            <span aria-hidden="true"> → </span>
+            {leg.route.toStation}
+          </p>
+        ) : null}
+
         {leg.connection ? (
           <button
             type="button"

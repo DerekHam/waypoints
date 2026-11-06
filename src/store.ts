@@ -878,8 +878,8 @@ export const useAtlasStore = create<AtlasState>()((set, get) => ({
       const route = await computeRoute(
         session.token,
         leg.mode,
-        { lat: from.lat, lon: from.lon, name: stopName(from, 'en') },
-        { lat: to.lat, lon: to.lon, name: stopName(to, 'en') },
+        { lat: from.lat, lon: from.lon, name: stopName(from, 'en'), nameZh: from.nameZh },
+        { lat: to.lat, lon: to.lon, name: stopName(to, 'en'), nameZh: to.nameZh },
       )
       const current = get().atlas
       if (!current) return
@@ -946,8 +946,8 @@ export const useAtlasStore = create<AtlasState>()((set, get) => ({
           const route = await computeRoute(
             token,
             leg.mode,
-            { lat: from.lat, lon: from.lon, name: stopName(from, 'en') },
-            { lat: to.lat, lon: to.lon, name: stopName(to, 'en') },
+            { lat: from.lat, lon: from.lon, name: stopName(from, 'en'), nameZh: from.nameZh },
+            { lat: to.lat, lon: to.lon, name: stopName(to, 'en'), nameZh: to.nameZh },
           )
           leg.route = route
           if (!route.distanceKm) {

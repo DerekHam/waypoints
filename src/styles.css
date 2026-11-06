@@ -1396,6 +1396,14 @@ a {
   color: var(--muted);
 }
 
+.leg-stations {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-family: var(--font-ui);
+  font-size: 9.5px;
+  letter-spacing: 0.02em;
+}
+
 .leg-status {
   display: inline-flex;
   align-items: center;

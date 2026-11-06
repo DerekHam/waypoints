@@ -132,8 +132,8 @@ export async function saveAtlas(
 export async function computeRoute(
   token: string,
   mode: TransportMode,
-  from: { lat: number; lon: number; name?: string },
-  to: { lat: number; lon: number; name?: string },
+  from: { lat: number; lon: number; name?: string; nameZh?: string },
+  to: { lat: number; lon: number; name?: string; nameZh?: string },
 ): Promise<RouteResponse> {
   return request<RouteResponse>('/api/route', {
     method: 'POST',
@@ -145,8 +145,8 @@ export async function computeRoute(
 
 export async function findRailConnections(
   token: string,
-  from: { lat: number; lon: number; name?: string },
-  to: { lat: number; lon: number; name?: string },
+  from: { lat: number; lon: number; name?: string; nameZh?: string },
+  to: { lat: number; lon: number; name?: string; nameZh?: string },
   date: string,
   time: string,
   timezone: string,

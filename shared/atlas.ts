@@ -66,6 +66,9 @@ const routeSchema = z.object({
   points: z.array(z.tuple([z.number(), z.number()])).max(2500).optional(),
   distanceKm: z.number().nonnegative().optional(),
   status: z.enum(['routed', 'estimated']).default('estimated'),
+  /** Stations chosen for a rail leg, when the provider resolved them. */
+  fromStation: z.string().max(160).optional(),
+  toStation: z.string().max(160).optional(),
 })
 
 const connectionSegmentSchema = z.object({
