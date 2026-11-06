@@ -393,6 +393,9 @@ export function Globe(): React.ReactElement {
       return
     }
     mapRef.current = map
+    if (import.meta.env.DEV) {
+      ;(window as unknown as { __waypointsMap?: MapLibreMap }).__waypointsMap = map
+    }
 
     map.addControl(new AttributionControl({ compact: true }), 'bottom-right')
     map.addControl(
@@ -403,8 +406,8 @@ export function Globe(): React.ReactElement {
     map.on('style.load', () => {
       map.setProjection({ type: 'globe' })
       addMapLayers(map)
+      setReady(true)
     })
-    map.once('load', () => setReady(true))
     map.on('error', (event) => {
       if (!map.isStyleLoaded()) {
         console.error('Map failed to load', event.error)
@@ -434,8 +437,9 @@ export function Globe(): React.ReactElement {
     routes?.setData(mapData.routes)
   }, [mapData, ready])
 
+  const hasAtlas = Boolean(atlas)
   useEffect(() => {
-    if (!ready) return
+    if (!ready || !hasAtlas) return
     const map = mapRef.current
     const currentAtlas = atlasRef.current
     if (!map || !currentAtlas) return
@@ -475,7 +479,7 @@ export function Globe(): React.ReactElement {
       ],
       { padding: 70, maxZoom: 3.6, duration: 1100 },
     )
-  }, [ready, selectedJourneyId, selectedStopId])
+  }, [ready, hasAtlas, selectedJourneyId, selectedStopId])
 
   return (
     <div className={`globe-stage ${ready ? 'is-ready' : ''}`} ref={stageRef}>
