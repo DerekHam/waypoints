@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-05T16:31:14.888Z",
+  "updatedAt": "2026-11-06T16:00:04.197Z",
   "lastEditedBy": "Derek",
   "journeys": [
     {
@@ -244,7 +244,9 @@
               ]
             ],
             "distanceKm": 93.3,
-            "status": "routed"
+            "status": "routed",
+            "fromStation": "上海站",
+            "toStation": "苏州站"
           },
           "connection": null
         },
@@ -323,7 +325,9 @@
               ]
             ],
             "distanceKm": 252.4,
-            "status": "routed"
+            "status": "routed",
+            "fromStation": "苏州站",
+            "toStation": "杭州站"
           },
           "connection": null
         },
@@ -418,7 +422,9 @@
               ]
             ],
             "distanceKm": 396.8,
-            "status": "routed"
+            "status": "routed",
+            "fromStation": "杭州站",
+            "toStation": "黄山北站"
           },
           "connection": null
         },
@@ -561,7 +567,9 @@
               ]
             ],
             "distanceKm": 578.4,
-            "status": "routed"
+            "status": "routed",
+            "fromStation": "黄山北站",
+            "toStation": "武汉站"
           },
           "connection": null
         },
@@ -748,7 +756,9 @@
               ]
             ],
             "distanceKm": 939.2,
-            "status": "routed"
+            "status": "routed",
+            "fromStation": "武汉站",
+            "toStation": "重庆北站"
           },
           "connection": null
         },
@@ -863,7 +873,9 @@
               ]
             ],
             "distanceKm": 402,
-            "status": "routed"
+            "status": "routed",
+            "fromStation": "重庆北站",
+            "toStation": "成都东站"
           },
           "connection": null
         },
@@ -1014,7 +1026,9 @@
               ]
             ],
             "distanceKm": 715.4,
-            "status": "routed"
+            "status": "routed",
+            "fromStation": "成都东站",
+            "toStation": "西安北站"
           },
           "connection": null
         },
