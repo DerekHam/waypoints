@@ -189,15 +189,16 @@ function addMapLayers(map: MapLibreMap): void {
     firstSymbol,
   )
 
+  // Car, bus and other ground routes: solid.
   map.addLayer(
     {
-      id: 'waypoints-route-train',
+      id: 'waypoints-route-solid',
       type: 'line',
       source: 'waypoints-routes',
       filter: [
-        'all',
-        ['==', ['get', 'mode'], 'train'],
-        ['!=', ['get', 'estimated'], true],
+        'in',
+        ['get', 'mode'],
+        ['literal', ['car', 'bus', 'bike', 'walk']],
       ],
       layout: { 'line-cap': 'round', 'line-join': 'round' },
       paint: {
@@ -209,22 +210,41 @@ function addMapLayers(map: MapLibreMap): void {
     firstSymbol,
   )
 
+  // Rail: the dashed convention used for railway lines on maps.
   map.addLayer(
     {
-      id: 'waypoints-route-dashed',
+      id: 'waypoints-route-train',
+      type: 'line',
+      source: 'waypoints-routes',
+      filter: ['==', ['get', 'mode'], 'train'],
+      layout: { 'line-cap': 'butt', 'line-join': 'round' },
+      paint: {
+        'line-color': ['get', 'color'],
+        'line-width': ['interpolate', ['linear'], ['zoom'], 2, 2, 6, 2.8, 12, 4],
+        'line-dasharray': [3, 1.15],
+        'line-opacity': ['case', ['get', 'active'], 0.95, 0.2],
+      },
+    },
+    firstSymbol,
+  )
+
+  // Air and sea: fine dots. A zero-length dash with a round cap renders as a dot.
+  map.addLayer(
+    {
+      id: 'waypoints-route-dotted',
       type: 'line',
       source: 'waypoints-routes',
       filter: [
-        'any',
-        ['!=', ['get', 'mode'], 'train'],
-        ['==', ['get', 'estimated'], true],
+        'in',
+        ['get', 'mode'],
+        ['literal', ['plane', 'ferry']],
       ],
       layout: { 'line-cap': 'round', 'line-join': 'round' },
       paint: {
         'line-color': ['get', 'color'],
-        'line-width': ['interpolate', ['linear'], ['zoom'], 2, 1.6, 6, 2.2, 12, 3.2],
-        'line-dasharray': [2, 2],
-        'line-opacity': ['case', ['get', 'active'], 0.9, 0.2],
+        'line-width': ['interpolate', ['linear'], ['zoom'], 2, 2.8, 6, 3.4, 12, 4.2],
+        'line-dasharray': [0.1, 1.8],
+        'line-opacity': ['case', ['get', 'active'], 0.95, 0.2],
       },
     },
     firstSymbol,

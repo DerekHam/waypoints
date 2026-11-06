@@ -334,7 +334,7 @@ For rail, the Worker does not assume a city has one station. It resolves up to e
 
 **Fair use:** OSRM’s FOSSGIS demo asks for ≤1 request/second and light use; OpenRailRouting and Transitous are community/demo services. The Worker caches results and only computes missing routes while editing. If you outgrow the demos, self-host OSRM/OpenRailRouting or swap the endpoints in `worker/src/index.ts`.
 
-If a route cannot be computed, the leg keeps a dashed estimated line. Nothing about the public page breaks.
+Line styles follow the transport mode: rail legs use the dashed convention for railway lines, car/bus/bike/walk legs are solid, and flights and ferries are dotted. If a route cannot be computed, the leg keeps a light estimated line. Nothing about the public page breaks.
 
 ### Attribution
 
