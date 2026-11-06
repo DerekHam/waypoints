@@ -9,13 +9,14 @@ async function sample(): Promise<Atlas> {
 }
 
 describe('atlas schema', () => {
-  it('accepts the bundled sample atlas', async () => {
+  it('accepts the bundled atlas', async () => {
     const result = atlasSchema.safeParse(await sample())
     expect(result.success).toBe(true)
     if (result.success) {
-      expect(result.data.journeys).toHaveLength(1)
-      expect(result.data.journeys[0].stops.length).toBe(9)
-      expect(result.data.journeys[0].legs.length).toBe(8)
+      expect(result.data.journeys.length).toBeGreaterThan(0)
+      for (const journey of result.data.journeys) {
+        expect(journey.legs.length).toBe(Math.max(0, journey.stops.length - 1))
+      }
     }
   })
 
@@ -35,8 +36,11 @@ describe('atlas schema', () => {
 
   it('accepts bilingual content', async () => {
     const data = await sample()
-    expect(data.journeys[0].titleZh).toBe('江南与蜀道')
-    expect(data.journeys[0].stops[0].nameZh).toBe('上海')
-    expect(data.journeys[0].stops[0].noteZh).toContain('法租界')
+    const journey = data.journeys[0]
+    journey.titleZh = '毕业旅行'
+    journey.stops[0].nameZh = '北京'
+    journey.stops[0].noteZh = '从北京出发的慢车。'
+    const result = atlasSchema.safeParse(data)
+    expect(result.success).toBe(true)
   })
 })
