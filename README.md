@@ -1,12 +1,13 @@
 # Waypoints · 途迹
 
-A bilingual, antique-globe travel wishlist. A slowly turning parchment globe, multiple journeys, real ground and rail paths, and a small editing relay that lets a handful of travel partners update the same public atlas.
+A bilingual, antique-globe travel wishlist. A freely rotating parchment globe, multiple journeys, real ground and rail paths, and a small editing relay that lets a handful of travel partners update the same public atlas.
 
 - **Public site:** static, read-only, hosted on GitHub Pages at `https://waypoints.derekhan.link`
 - **Editing:** a Cloudflare Worker verifies per-partner access keys and commits changes to this repository
 - **Content:** one versioned JSON file with optional English and Chinese fields
 - **Routes:** OSRM for roads, OpenRailRouting for railway tracks, Transitous for optional timetable examples, great-circle arcs for flights
-- **Design:** beige paper, sepia geography generated from Natural Earth data, EB Garamond, terracotta pins, no map tiles
+- **Design:** beige paper, sepia geography from 1:10m Natural Earth vectors and shaded relief, EB Garamond, terracotta pins, no map tiles
+- **Globe:** free trackball rotation, no fixed axis, scroll/pinch zoom, progressive 4K→8K basemap
 
 The bundled sample is **江南与蜀道 / Jiangnan & the Shu Roads** — a nine-stop spring journey through China.
 
@@ -44,7 +45,34 @@ npm run validate    # validate the atlas JSON with the shared schema
 npm run keygen -- "Derek"   # generate a partner access key
 npm run keygen -- --name "Derek" --key "a long passphrase"  # or choose your own
 npm run routes      # re-compute route geometry for the sample
+npm run globe:texture  # rebuild the detailed basemap (downloads Natural Earth data)
 ```
+
+---
+
+## The globe and its detail
+
+The globe is not a fixed-axis model. Drag anywhere on it to rotate freely in any direction (including over the poles and with roll); use the scroll wheel or a pinch gesture to zoom. The view settles where you leave it — there is no idle auto-spin. Selecting a journey or stop eases the globe back to that place; you can then keep rotating freely.
+
+The basemap is pre-rendered from public-domain Natural Earth data so it keeps the antique palette and stays fast:
+
+- 1:10m land and coastlines
+- country borders and 1:10m first-order subdivision borders
+- major and secondary roads, plus railways
+- rivers, lakes and large urban areas
+- 1:50m shaded relief for terrain
+- major populated places as small ink dots
+- 10° and 30° graticules, paper grain and stains
+
+It is drawn at **8192×4096** and downscaled to **4096×2048**. Browsers first receive the 4K image, then upgrade to 8K on desktop when the GPU and viewport are suitable. The zoom limit is deliberately tuned so the 8K basemap stays readable; this is an atlas, not a street-level tile map.
+
+Regenerate the basemap with:
+
+```bash
+npm run globe:texture
+```
+
+The source data (Natural Earth shapefiles and the shaded-relief TIFF) is downloaded to `.globe-cache/`, which is ignored by git. Only the finished JPEGs in `public/globe/` are committed.
 
 ---
 
@@ -325,7 +353,7 @@ The Globe labels intentionally avoid uppercase/letter-spacing in Chinese; the CS
 ```
 public/
   data/atlas.json       the editable atlas
-  geo/                  Natural Earth TopoJSON (50m/110m)
+  globe/                pre-rendered 4K/8K antique basemaps
   CNAME, robots.txt, sitemap.xml, og.jpg, favicon.svg
 shared/
   atlas.ts              Zod schema + bilingual content helpers
@@ -340,8 +368,9 @@ worker/
   wrangler.toml
   .dev.vars.example
 scripts/
-  make-key.mjs          generate partner keys
+  make-key.mjs          generate partner keys (random or custom)
   precompute-routes.mjs sample route geometry
+  build-globe-texture.mjs  pre-render the detailed basemap
   validate-atlas.ts     validate the JSON
 .github/workflows/
   deploy.yml            GitHub Pages
@@ -371,4 +400,4 @@ scripts/
 
 ## Credits
 
-Built by Derek. Coastlines from [Natural Earth](https://www.naturalearthdata.com/). Map data © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors (ODbL). Routes by [OSRM](https://project-osrm.org/) and [OpenRailRouting](https://github.com/geofabrik/OpenRailRouting). Timetables by [Transitous](https://transitous.org/) / MOTIS. Typefaces: EB Garamond and Inter (SIL Open Font License).
+Built by Derek. Basemap, coastlines, roads, relief and borders from [Natural Earth](https://www.naturalearthdata.com/) (public domain). Geocoding and route data © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors (ODbL). Routes by [OSRM](https://project-osrm.org/) and [OpenRailRouting](https://github.com/geofabrik/OpenRailRouting). Timetables by [Transitous](https://transitous.org/) / MOTIS. Typefaces: EB Garamond and Inter (SIL Open Font License).

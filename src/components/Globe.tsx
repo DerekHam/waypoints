@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import * as THREE from 'three'
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls.js'
 import { Line2 } from 'three/examples/jsm/lines/Line2.js'
 import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry.js'
 import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js'
@@ -8,10 +8,9 @@ import { stopName, type Atlas, type Journey, type Leg, type Stop } from '@shared
 import { useAtlasStore, useUIStore } from '@/store'
 import { useT } from '@/i18n'
 import { journeyColor } from '@/lib/colors'
-import { createGlobeTexture } from '@/lib/globeTexture'
+import { loadGlobeTexture } from '@/lib/globeTexture'
 import { clamp, latLonToVector3 } from '@/lib/geo'
 
-const TILT = THREE.MathUtils.degToRad(-23.4)
 const HALO = new THREE.Color('#efe5d1')
 
 type TextureState = 'loading' | 'drawing' | 'ready' | 'error'
@@ -43,14 +42,13 @@ type SceneApi = {
   renderer: THREE.WebGLRenderer
   scene: THREE.Scene
   camera: THREE.PerspectiveCamera
-  controls: OrbitControls
+  controls: TrackballControls
   group: THREE.Group
   stage: HTMLDivElement
   lines: THREE.Object3D[]
   lineMaterials: LineMaterial[]
   frame: number
   focus: FocusState | null
-  idleTimer: number | null
   reducedMotion: boolean
   destroyed: boolean
 }
@@ -324,6 +322,7 @@ function focusDirection(api: SceneApi, direction: THREE.Vector3, distance: numbe
   const startDir = api.camera.position.clone().normalize()
   const startDist = api.camera.position.length()
   const endDir = direction.clone().normalize()
+  api.camera.up.set(0, 1, 0)
   if (api.reducedMotion) {
     api.camera.position.copy(endDir.multiplyScalar(distance))
     api.camera.lookAt(0, 0, 0)
@@ -332,11 +331,6 @@ function focusDirection(api: SceneApi, direction: THREE.Vector3, distance: numbe
     return
   }
   api.controls.enabled = false
-  api.controls.autoRotate = false
-  if (api.idleTimer) {
-    window.clearTimeout(api.idleTimer)
-    api.idleTimer = null
-  }
   api.focus = {
     start: performance.now(),
     duration: 950,
@@ -363,7 +357,7 @@ function journeyFocus(journey: Journey, group: THREE.Group): { dir: THREE.Vector
   }
   return {
     dir: center,
-    distance: clamp(3.2 + spread * 1.3, 3.2, 4.35),
+    distance: clamp(3.1 + spread * 1.35, 3.1, 4.5),
   }
 }
 
@@ -446,7 +440,6 @@ export function Globe(): React.ReactElement {
     let api: SceneApi | null = null
     let observer: ResizeObserver | null = null
     let onStart: (() => void) | null = null
-    let onEnd: (() => void) | null = null
 
     try {
       const renderer = new THREE.WebGLRenderer({
@@ -464,11 +457,10 @@ export function Globe(): React.ReactElement {
       const camera = new THREE.PerspectiveCamera(
         42,
         Math.max(stage.clientWidth, 1) / Math.max(stage.clientHeight, 1),
-        0.1,
+        0.05,
         100,
       )
       const group = new THREE.Group()
-      group.rotation.z = TILT
       scene.add(group)
 
       const globeMaterial = new THREE.MeshStandardMaterial({
@@ -519,22 +511,21 @@ export function Globe(): React.ReactElement {
 
       const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
       const initialDir = worldDirection(26, 108, group)
+      camera.up.set(0, 1, 0)
       camera.position.copy(initialDir.multiplyScalar(3.6))
       camera.lookAt(0, 0, 0)
 
-      const controls = new OrbitControls(camera, canvas)
+      const controls = new TrackballControls(camera, canvas)
       controls.target.set(0, 0, 0)
-      controls.enableDamping = true
-      controls.dampingFactor = 0.065
-      controls.rotateSpeed = 0.48
-      controls.zoomSpeed = 0.65
-      controls.enablePan = false
-      controls.minDistance = 2.3
-      controls.maxDistance = 5
-      controls.minPolarAngle = 0.12
-      controls.maxPolarAngle = Math.PI - 0.12
-      controls.autoRotate = false
-      controls.autoRotateSpeed = 0.18
+      controls.rotateSpeed = 1
+      controls.zoomSpeed = 1.25
+      controls.panSpeed = 0
+      controls.noPan = true
+      controls.staticMoving = false
+      controls.dynamicDampingFactor = 0.12
+      controls.minDistance = 1.7
+      controls.maxDistance = 6
+      controls.handleResize()
       controls.update()
 
       api = {
@@ -548,20 +539,11 @@ export function Globe(): React.ReactElement {
         lineMaterials: [],
         frame: 0,
         focus: null,
-        idleTimer: null,
         reducedMotion,
         destroyed: false,
       }
       const current = api
       apiRef.current = current
-
-      const scheduleIdleRotation = () => {
-        if (current.reducedMotion) return
-        if (current.idleTimer) window.clearTimeout(current.idleTimer)
-        current.idleTimer = window.setTimeout(() => {
-          if (!current.focus) current.controls.autoRotate = true
-        }, 22_000)
-      }
 
       onStart = () => {
         if (current.focus) {
@@ -569,35 +551,39 @@ export function Globe(): React.ReactElement {
           current.controls.enabled = true
           current.controls.update()
         }
-        current.controls.autoRotate = false
-        if (current.idleTimer) {
-          window.clearTimeout(current.idleTimer)
-          current.idleTimer = null
-        }
-      }
-      onEnd = () => {
-        scheduleIdleRotation()
       }
       controls.addEventListener('start', onStart)
-      controls.addEventListener('end', onEnd)
 
-      createGlobeTexture((progress) => {
-        if (progress.stage === 'drawing') setTextureState('drawing')
-        if (progress.stage === 'loading') setTextureState('loading')
-      })
-        .then((textureCanvas) => {
-          if (current.destroyed) return
-          const texture = new THREE.CanvasTexture(textureCanvas)
-          texture.colorSpace = THREE.SRGBColorSpace
-          texture.anisotropy = renderer.capabilities.getMaxAnisotropy()
+      void loadGlobeTexture(renderer, {
+        onBase: (texture) => {
+          if (current.destroyed) {
+            texture.dispose()
+            return
+          }
           globeMaterial.map = texture
           globeMaterial.color.set(0xffffff)
           globeMaterial.needsUpdate = true
           setTextureState('ready')
-        })
-        .catch(() => {
-          if (!current.destroyed) setTextureState('error')
-        })
+        },
+        onHighResolution: (texture) => {
+          if (current.destroyed) {
+            texture.dispose()
+            return
+          }
+          const previous = globeMaterial.map
+          globeMaterial.map = texture
+          globeMaterial.needsUpdate = true
+          previous?.dispose()
+        },
+        onProgress: (progress) => {
+          if (current.destroyed) return
+          if (progress.stage === 'loading') setTextureState('loading')
+          if (progress.stage === 'error') setTextureState('error')
+          if (progress.stage === 'ready') setTextureState('ready')
+        },
+      }).catch(() => {
+        if (!current.destroyed) setTextureState('error')
+      })
 
       const resize = () => {
         const width = Math.max(stage.clientWidth, 1)
@@ -606,6 +592,7 @@ export function Globe(): React.ReactElement {
         renderer.setSize(width, height, false)
         camera.aspect = width / height
         camera.updateProjectionMatrix()
+        controls.handleResize()
         for (const material of current.lineMaterials) {
           material.resolution.set(width, height)
         }
@@ -637,7 +624,6 @@ export function Globe(): React.ReactElement {
             current.focus = null
             current.controls.enabled = true
             current.controls.update()
-            scheduleIdleRotation()
           }
         } else {
           current.controls.update()
@@ -654,10 +640,8 @@ export function Globe(): React.ReactElement {
       if (api) {
         api.destroyed = true
         window.cancelAnimationFrame(api.frame)
-        if (api.idleTimer) window.clearTimeout(api.idleTimer)
         observer?.disconnect()
         if (onStart) api.controls.removeEventListener('start', onStart)
-        if (onEnd) api.controls.removeEventListener('end', onEnd)
         disposeLines(api)
         api.controls.dispose()
         api.scene.traverse((object) => {
@@ -704,7 +688,7 @@ export function Globe(): React.ReactElement {
         focusDirection(
           api,
           worldDirection(stop.lat, stop.lon, api.group),
-          Math.min(3.3, api.controls.maxDistance),
+          Math.min(2.65, api.controls.maxDistance),
         )
         return
       }
