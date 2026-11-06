@@ -42,6 +42,7 @@ npm run preview     # preview the production build
 npm test            # unit tests
 npm run validate    # validate the atlas JSON with the shared schema
 npm run keygen -- "Derek"   # generate a partner access key
+npm run keygen -- --name "Derek" --key "a long passphrase"  # or choose your own
 npm run routes      # re-compute route geometry for the sample
 ```
 
@@ -159,10 +160,24 @@ Open the site, click **Edit**, enter a generated key, add a place, check a rail 
 
 ## Partners and keys
 
-Generate one key per person:
+Keys are checked on the Worker, not in the browser. The browser’s access-key field simply submits whatever key you gave the editor; the key generator is the CLI below.
+
+Generate a random key per person:
 
 ```bash
 npm run keygen -- "Alex"
+```
+
+Or choose your own key/passphrase:
+
+```bash
+npm run keygen -- --name "Alex" --key "a long custom passphrase"
+```
+
+To keep the custom key out of shell history, let the script prompt for it:
+
+```bash
+npm run keygen -- --name "Alex" --key-stdin
 ```
 
 Add the printed object to the `EDITOR_KEYS` array. The array is a Worker secret:
@@ -174,11 +189,12 @@ Add the printed object to the `EDITOR_KEYS` array. The array is a Worker secret:
 ]
 ```
 
-The key itself is shown once at generation time. Give it to the partner through a password manager or another private channel.
+The key itself is shown once at generation time. Give it to the partner through a password manager or another private channel. Keys can contain spaces and Unicode; leading/trailing spaces are trimmed.
 
-- **Add someone:** add their entry, update the secret, redeploy.
-- **Revoke someone:** remove their entry, update the secret, redeploy. Existing sessions remain valid for up to seven days. To end every session immediately, generate a new `SESSION_SECRET` and redeploy; everyone re-enters their key.
-- Use generated keys, not short human passwords. The keys are high-entropy; the Worker stores only their hashes.
+- **Replacing a key:** replace that editor’s object in the array. Don’t leave the old object alongside the new one, or the old key will keep working.
+- **Add someone:** add their entry, update the secret.
+- **Revoke someone:** remove their entry, update the secret. Existing sessions remain valid for up to seven days. To end every session immediately, generate a new `SESSION_SECRET` and redeploy; everyone re-enters their key.
+- **Security:** the Worker stores only a salted SHA-256 hash. Random keys are strongest. If you choose a custom key, use a long one — 20+ characters or four or more random words. A short custom key is easy to guess; login rate limiting helps but is not a substitute for entropy.
 - GitHub commits are attributed in the message (`Atlas update by Alex`), even though all writes use the same repository token.
 
 Local development uses the same API. Copy `worker/.dev.vars.example` to `worker/.dev.vars`, fill in a test key and secrets, run the Worker, and point the site at it:
