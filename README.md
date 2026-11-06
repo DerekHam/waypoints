@@ -7,7 +7,7 @@ A bilingual, antique-globe travel wishlist. A freely rotating parchment globe, m
 - **Content:** one versioned JSON file with optional English and Chinese fields
 - **Routes:** OSRM for roads, OpenRailRouting for railway tracks, Transitous for optional timetable examples, great-circle arcs for flights
 - **Design:** beige paper, sepia geography from 1:10m Natural Earth vectors and shaded relief, EB Garamond, terracotta pins, no map tiles
-- **Globe:** free trackball rotation, no fixed axis, scroll/pinch zoom, progressive 4K→8K basemap
+- **Globe:** free trackball rotation, no fixed axis, scroll/pinch zoom, progressive 4K→8K→12K basemap
 
 The bundled sample is **江南与蜀道 / Jiangnan & the Shu Roads** — a nine-stop spring journey through China.
 
@@ -64,7 +64,7 @@ The basemap is pre-rendered from public-domain Natural Earth data so it keeps th
 - major populated places as small ink dots
 - 10° and 30° graticules, paper grain and stains
 
-It is drawn at **8192×4096** and downscaled to **4096×2048**. Browsers first receive the 4K image, then upgrade to 8K on desktop when the GPU and viewport are suitable. The zoom limit is deliberately tuned so the 8K basemap stays readable; this is an atlas, not a street-level tile map.
+It is drawn at **12288×6144**, with **8192×4096** and **4096×2048** fallbacks. Browsers first receive the 4K image, then upgrade to the best detail level their GPU, memory and viewport can handle — normally 12K on desktop. The zoom limit adapts to the loaded texture so the map stays readable; this is an atlas, not a street-level tile map.
 
 Regenerate the basemap with:
 

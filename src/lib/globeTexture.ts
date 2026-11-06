@@ -51,17 +51,25 @@ export async function loadGlobeTexture(
   callbacks.onBase(base)
   callbacks.onProgress({ stage: 'ready' })
 
-  const canUpgrade =
-    renderer.capabilities.maxTextureSize >= 8192 &&
-    window.innerWidth >= 900 &&
-    !window.matchMedia('(prefers-reduced-data: reduce)').matches
+  const maxTextureSize = renderer.capabilities.maxTextureSize
+  const deviceMemory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory ?? 8
+  const reducedData = window.matchMedia('(prefers-reduced-data: reduce)').matches
+  if (reducedData || window.innerWidth < 900 || maxTextureSize < 8192) return
 
-  if (!canUpgrade) return
-  try {
-    const high = configure(await loader.loadAsync(assetUrl('globe-8192.jpg')), renderer)
-    callbacks.onHighResolution(high)
-    callbacks.onProgress({ stage: 'ready', highResolution: true })
-  } catch {
-    // The 4K basemap is perfectly usable if the detail pass is unavailable.
+  const candidates: string[] = []
+  if (maxTextureSize >= 12288 && deviceMemory >= 8 && window.innerWidth >= 1100) {
+    candidates.push('globe-12288.jpg')
+  }
+  candidates.push('globe-8192.jpg')
+
+  for (const candidate of candidates) {
+    try {
+      const high = configure(await loader.loadAsync(assetUrl(candidate)), renderer)
+      callbacks.onHighResolution(high)
+      callbacks.onProgress({ stage: 'ready', highResolution: true })
+      return
+    } catch {
+      // Try the next detail level, then keep the 4K basemap.
+    }
   }
 }

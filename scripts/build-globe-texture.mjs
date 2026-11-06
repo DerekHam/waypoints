@@ -30,7 +30,7 @@ const GEO_CACHE = join(CACHE, 'geojson')
 const SHP_CACHE = join(CACHE, 'shapefiles')
 const RELIEF_CACHE = join(CACHE, 'relief')
 const OUT = join(ROOT, 'public', 'globe')
-const WIDTH = Number(process.argv.find((arg) => arg.startsWith('--size='))?.split('=')[1] ?? 8192)
+const WIDTH = Number(process.argv.find((arg) => arg.startsWith('--size='))?.split('=')[1] ?? 12288)
 const HEIGHT = WIDTH / 2
 const LOW_WIDTH = Math.min(4096, WIDTH)
 const LOW_HEIGHT = LOW_WIDTH / 2
@@ -64,7 +64,7 @@ const COLORS = {
   road: 'rgba(127, 94, 56, 0.22)',
   roadMajor: 'rgba(120, 86, 49, 0.28)',
   rail: 'rgba(70, 59, 47, 0.25)',
-  city: 'rgba(70, 55, 35, 0.42)',
+  city: 'rgba(70, 55, 35, 0.36)',
   urban: 'rgba(144, 113, 73, 0.055)',
   graticule: 'rgba(95, 79, 58, 0.18)',
   graticuleFine: 'rgba(95, 79, 58, 0.06)',
@@ -338,7 +338,8 @@ async function build() {
     const point = projection([coordinates[0], coordinates[1]])
     if (!point) continue
     const population = prop(place, 'pop_max', 'POP_MAX') ?? 0
-    const radius = (2 + Math.min(2.5, Math.log10(Math.max(1_000_000, population)) - 5)) * unit
+    const radius =
+      (1.15 + Math.min(1.6, Math.log10(Math.max(1_000_000, population)) - 5)) * unit
     context.beginPath()
     context.arc(point[0], point[1], radius, 0, Math.PI * 2)
     context.fillStyle = COLORS.city
@@ -406,6 +407,17 @@ async function build() {
   const highPath = join(OUT, `globe-${WIDTH}.jpg`)
   writeFileSync(highPath, highJpeg)
   console.log(`  ${highPath} (${(highJpeg.length / 1024 / 1024).toFixed(2)} MB)`)
+
+  if (WIDTH > 8192) {
+    log('downscaling to 8192×4096')
+    const midJpeg = await sharp(highJpeg)
+      .resize(8192, 4096, { kernel: 'lanczos3' })
+      .jpeg({ quality: 87, mozjpeg: true })
+      .toBuffer()
+    const midPath = join(OUT, 'globe-8192.jpg')
+    writeFileSync(midPath, midJpeg)
+    console.log(`  ${midPath} (${(midJpeg.length / 1024 / 1024).toFixed(2)} MB)`)
+  }
 
   if (LOW_WIDTH !== WIDTH) {
     log(`downscaling to ${LOW_WIDTH}×${LOW_HEIGHT}`)

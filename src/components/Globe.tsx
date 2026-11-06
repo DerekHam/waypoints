@@ -523,7 +523,12 @@ export function Globe(): React.ReactElement {
       controls.noPan = true
       controls.staticMoving = false
       controls.dynamicDampingFactor = 0.12
-      controls.minDistance = 1.7
+      controls.minDistance =
+        renderer.capabilities.maxTextureSize >= 12288
+          ? 1.2
+          : renderer.capabilities.maxTextureSize >= 8192
+            ? 1.4
+            : 1.55
       controls.maxDistance = 6
       controls.handleResize()
       controls.update()
@@ -574,6 +579,9 @@ export function Globe(): React.ReactElement {
           globeMaterial.map = texture
           globeMaterial.needsUpdate = true
           previous?.dispose()
+          const detailWidth = (texture.image as { width?: number } | undefined)?.width ?? 0
+          if (detailWidth >= 12288) current.controls.minDistance = 1.18
+          else if (detailWidth >= 8192) current.controls.minDistance = 1.4
         },
         onProgress: (progress) => {
           if (current.destroyed) return
