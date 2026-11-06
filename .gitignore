@@ -7,5 +7,4 @@ dist
 playwright-report
 test-results
 screenshots
-.globe-cache
 .env

@@ -12,7 +12,7 @@ export function haversineKm(a: [number, number], b: [number, number]): number {
   return 2 * R * Math.asin(Math.min(1, Math.sqrt(h)))
 }
 
-/** [lon, lat] to the same spherical coordinates used by three.js SphereGeometry. */
+/** [lon, lat] to a unit vector on the sphere (used by route/focus helpers). */
 export function latLonToVector3(lat: number, lon: number, radius = 1): [number, number, number] {
   const phi = ((90 - lat) * Math.PI) / 180
   const theta = ((lon + 180) * Math.PI) / 180

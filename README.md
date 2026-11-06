@@ -6,8 +6,8 @@ A bilingual, antique-globe travel wishlist. A freely rotating parchment globe, m
 - **Editing:** a Cloudflare Worker verifies per-partner access keys and commits changes to this repository
 - **Content:** one versioned JSON file with optional English and Chinese fields
 - **Routes:** OSRM for roads, OpenRailRouting for railway tracks, Transitous for optional timetable examples, great-circle arcs for flights
-- **Design:** beige paper, sepia geography from 1:10m Natural Earth vectors and shaded relief, EB Garamond, terracotta pins, no map tiles
-- **Globe:** free trackball rotation, no fixed axis, scroll/pinch zoom, progressive 4K→8K→12K basemap
+- **Design:** beige paper, a sepia OpenStreetMap vector basemap with terrain, EB Garamond, terracotta pins
+- **Globe:** MapLibre GL globe with free 3D rotation, scroll/pinch zoom to street level, and vector tile layers that load by zoom
 
 The bundled sample is **江南与蜀道 / Jiangnan & the Shu Roads** — a nine-stop spring journey through China.
 
@@ -45,34 +45,29 @@ npm run validate    # validate the atlas JSON with the shared schema
 npm run keygen -- "Derek"   # generate a partner access key
 npm run keygen -- --name "Derek" --key "a long passphrase"  # or choose your own
 npm run routes      # re-compute route geometry for the sample
-npm run globe:texture  # rebuild the detailed basemap (downloads Natural Earth data)
+npm run map:style   # regenerate the MapLibre style from OpenFreeMap Positron
 ```
 
 ---
 
-## The globe and its detail
+## The globe and map layers
 
-The globe is not a fixed-axis model. Drag anywhere on it to rotate freely in any direction (including over the poles and with roll); use the scroll wheel or a pinch gesture to zoom. The view settles where you leave it — there is no idle auto-spin. Selecting a journey or stop eases the globe back to that place; you can then keep rotating freely.
+The globe is **MapLibre GL** with a real tiled vector basemap. It is not a baked texture. Drag to rotate the globe, scroll or pinch to zoom all the way down to street level, and use right-drag or two fingers to tilt/rotate the view. There is no fixed grid or idle auto-spin. Selecting a journey or stop eases the globe to that place; you can keep rotating freely afterwards. The initial view is fitted to the active journey, so it reads as a regional map; zoom out to see the planisphere.
 
-The basemap is pre-rendered from public-domain Natural Earth data so it keeps the antique palette and stays fast:
+The map loads layers progressively by zoom:
 
-- 1:10m land and coastlines
-- country borders and 1:10m first-order subdivision borders
-- major and secondary roads, plus railways
-- rivers, lakes and large urban areas
-- 1:50m shaded relief for terrain
-- major populated places as small ink dots
-- 10° and 30° graticules, paper grain and stains
+- **OpenFreeMap / OpenMapTiles** vector tiles: roads, water, land use, coastlines, subdivision boundaries, city labels and country labels
+- **Mapterhorn** terrarium DEM: hillshade and 3D terrain
+- The **Waypoints** beige/sepia style in `public/map-style.json`
+- The journey pins and route lines are MapLibre GeoJSON layers above the basemap
 
-It is drawn at **12288×6144**, with **8192×4096** and **4096×2048** fallbacks. Browsers first receive the 4K image, then upgrade to the best detail level their GPU, memory and viewport can handle — normally 12K on desktop. The zoom limit adapts to the loaded texture so the map stays readable; this is an atlas, not a street-level tile map.
-
-Regenerate the basemap with:
+No API key or account is required for the basemap or terrain. Both services are public and require attribution, which the map control and the itinerary footer provide. You can regenerate the style with:
 
 ```bash
-npm run globe:texture
+npm run map:style
 ```
 
-The source data (Natural Earth shapefiles and the shaded-relief TIFF) is downloaded to `.globe-cache/`, which is ignored by git. Only the finished JPEGs in `public/globe/` are committed.
+The generator is `scripts/build-map-style.mjs`; it fetches OpenFreeMap's Positron style, recolours it for Waypoints, adds the terrain source and hillshade, and writes `public/map-style.json`.
 
 ---
 
@@ -330,7 +325,7 @@ If a route cannot be computed, the leg keeps a dashed estimated line. Nothing ab
 
 ### Attribution
 
-The site credits Natural Earth, OpenStreetMap contributors, OSRM, OpenRailRouting and Transitous in the itinerary footer. Keep those links if you reuse the project.
+The site credits OpenFreeMap, OpenMapTiles, OpenStreetMap, Mapterhorn, OSRM, OpenRailRouting and Transitous in the map control and itinerary footer. Keep those links if you reuse the project.
 
 ---
 
@@ -353,7 +348,7 @@ The Globe labels intentionally avoid uppercase/letter-spacing in Chinese; the CS
 ```
 public/
   data/atlas.json       the editable atlas
-  globe/                pre-rendered 4K/8K antique basemaps
+  map-style.json        the sepia MapLibre basemap style
   CNAME, robots.txt, sitemap.xml, og.jpg, favicon.svg
 shared/
   atlas.ts              Zod schema + bilingual content helpers
@@ -370,7 +365,7 @@ worker/
 scripts/
   make-key.mjs          generate partner keys (random or custom)
   precompute-routes.mjs sample route geometry
-  build-globe-texture.mjs  pre-render the detailed basemap
+  build-map-style.mjs   build the sepia MapLibre style
   validate-atlas.ts     validate the JSON
 .github/workflows/
   deploy.yml            GitHub Pages
@@ -395,9 +390,11 @@ scripts/
 - Ferry routes are schematic; border-crossing ground routes can be approximate or unavailable.
 - Public changes wait for the GitHub Actions build (usually under a minute).
 - The demo routing/timetable services are community-run and not guaranteed.
+- Basemap tiles and terrain come from the public OpenFreeMap and Mapterhorn services; they are best-effort and can rate-limit or change. No API key is used.
+- The initial map view is journey-focused; zoom out with the map controls to see the full globe.
 
 ---
 
 ## Credits
 
-Built by Derek. Basemap, coastlines, roads, relief and borders from [Natural Earth](https://www.naturalearthdata.com/) (public domain). Geocoding and route data © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors (ODbL). Routes by [OSRM](https://project-osrm.org/) and [OpenRailRouting](https://github.com/geofabrik/OpenRailRouting). Timetables by [Transitous](https://transitous.org/) / MOTIS. Typefaces: EB Garamond and Inter (SIL Open Font License).
+Built by Derek. Basemap tiles by [OpenFreeMap](https://openfreemap.org) / [OpenMapTiles](https://www.openmaptiles.org/), with data © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors (ODbL). Terrain by [Mapterhorn](https://mapterhorn.com/attribution). Routes by [OSRM](https://project-osrm.org/) and [OpenRailRouting](https://github.com/geofabrik/OpenRailRouting). Timetables by [Transitous](https://transitous.org/) / MOTIS. Typefaces: EB Garamond and Inter (SIL Open Font License).

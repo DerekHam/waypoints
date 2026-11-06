@@ -422,7 +422,72 @@ a {
   right: 0;
   bottom: 0;
   z-index: 1;
+  overflow: hidden;
+  background: var(--paper);
   transition: left 0.35s ease;
+}
+
+.map-canvas {
+  position: absolute;
+  inset: 0;
+}
+
+.map-canvas .maplibregl-map {
+  font-family: var(--font-ui);
+}
+
+.map-canvas .maplibregl-canvas {
+  outline: none;
+}
+
+.map-canvas .maplibregl-ctrl-group {
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  background: rgba(242, 234, 217, 0.92);
+  box-shadow: 0 6px 18px rgba(55, 40, 22, 0.12);
+  overflow: hidden;
+}
+
+.map-canvas .maplibregl-ctrl-group button {
+  width: 30px;
+  height: 30px;
+  border-bottom: 1px solid var(--rule-soft);
+  background-color: transparent;
+}
+
+.map-canvas .maplibregl-ctrl-group button:last-child {
+  border-bottom: 0;
+}
+
+.map-canvas .maplibregl-ctrl-group button:hover {
+  background-color: rgba(255, 251, 241, 0.7);
+}
+
+.map-canvas .maplibregl-ctrl-group button + button {
+  border-left: 0;
+}
+
+.map-canvas .maplibregl-ctrl-attrib {
+  max-width: calc(100vw - 80px);
+  padding: 2px 7px;
+  border-radius: 2px;
+  background: rgba(242, 234, 217, 0.86);
+  color: var(--muted);
+  font-family: var(--font-ui);
+  font-size: 8.5px;
+  line-height: 1.5;
+}
+
+.map-canvas .maplibregl-ctrl-attrib a {
+  color: var(--ink-soft);
+}
+
+.map-canvas .maplibregl-ctrl-attrib-button {
+  background-color: rgba(242, 234, 217, 0.86);
+}
+
+.map-canvas .maplibregl-ctrl-bottom-right {
+  z-index: 4;
 }
 
 .globe-halo {
@@ -578,10 +643,12 @@ a {
 .globe-loading {
   position: absolute;
   inset: 0;
+  z-index: 6;
   display: grid;
   place-content: center;
   justify-items: center;
   gap: 18px;
+  background: rgba(236, 226, 205, 0.94);
   color: var(--ink-soft);
   pointer-events: none;
 }

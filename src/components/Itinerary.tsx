@@ -411,11 +411,17 @@ export function Itinerary() {
             ) : null}
           </div>
           <div className="attribution-links">
-            <a href="https://www.naturalearthdata.com/" target="_blank" rel="noopener noreferrer">
-              Natural Earth
+            <a href="https://openfreemap.org" target="_blank" rel="noopener noreferrer">
+              OpenFreeMap
+            </a>
+            <a href="https://www.openmaptiles.org/" target="_blank" rel="noopener noreferrer">
+              OpenMapTiles
             </a>
             <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">
               OpenStreetMap
+            </a>
+            <a href="https://mapterhorn.com/attribution" target="_blank" rel="noopener noreferrer">
+              Mapterhorn
             </a>
             <a href="https://project-osrm.org/" target="_blank" rel="noopener noreferrer">
               OSRM
