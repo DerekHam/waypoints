@@ -5,3 +5,5 @@ SESSION_SECRET = "replace-with-a-long-random-string"
 # Generate with: npm run keygen -- "Your name"
 # Use the generated array as the value (it is JSON).
 EDITOR_KEYS = '[{"name":"Test editor","salt":"replace","hash":"replace"}]'
+# Optional second array, read in addition to EDITOR_KEYS.
+# EDITOR_KEYS_EXTRA = '[{"name":"Another editor","salt":"replace","hash":"replace"}]'

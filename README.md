@@ -212,10 +212,23 @@ Add the printed object to the `EDITOR_KEYS` array. The array is a Worker secret:
 ]
 ```
 
+**Generating a key does not install it.** You must upload the array again before the key works:
+
+```bash
+npx wrangler secret put EDITOR_KEYS --config worker/wrangler.toml
+```
+
+If you no longer have the current array (Cloudflare never returns secret values), put the new object in the optional `EDITOR_KEYS_EXTRA` secret instead. The Worker reads both arrays, so existing keys keep working:
+
+```bash
+npx wrangler secret put EDITOR_KEYS_EXTRA --config worker/wrangler.toml
+# paste: [{"name":"Alex","salt":"…","hash":"…"}]
+```
+
 The key itself is shown once at generation time. Give it to the partner through a password manager or another private channel. Keys can contain spaces and Unicode; leading/trailing spaces are trimmed.
 
 - **Replacing a key:** replace that editor’s object in the array. Don’t leave the old object alongside the new one, or the old key will keep working.
-- **Add someone:** add their entry, update the secret.
+- **Add someone:** add their entry and update the secret (or use `EDITOR_KEYS_EXTRA`).
 - **Revoke someone:** remove their entry, update the secret. Existing sessions remain valid for up to seven days. To end every session immediately, generate a new `SESSION_SECRET` and redeploy; everyone re-enters their key.
 - **Security:** the Worker stores only a salted SHA-256 hash. Random keys are strongest. If you choose a custom key, use a long one — 20+ characters or four or more random words. A short custom key is easy to guess; login rate limiting helps but is not a substitute for entropy.
 - GitHub commits are attributed in the message (`Atlas update by Alex`), even though all writes use the same repository token.

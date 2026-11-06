@@ -14,6 +14,7 @@ type Env = {
   SITE_ORIGINS: string
   SESSION_SECRET: string
   EDITOR_KEYS: string
+  EDITOR_KEYS_EXTRA?: string
   PUBLIC_ORIGIN?: string
   WAYPOINTS_KV?: KVNamespace
 }
@@ -177,16 +178,25 @@ function constantTimeEqual(a: string, b: string): boolean {
   return difference === 0
 }
 
-async function verifyKey(env: Env, key: string): Promise<string | null> {
-  let editors: EditorKey[]
+function parseEditorKeys(raw: string | undefined, label: string): EditorKey[] {
+  if (!raw) return []
+  let parsed: unknown
   try {
-    editors = JSON.parse(env.EDITOR_KEYS) as EditorKey[]
+    parsed = JSON.parse(raw)
   } catch {
-    throw new HttpError(500, 'server_error', 'EDITOR_KEYS is not valid JSON')
+    throw new HttpError(500, 'server_error', `${label} is not valid JSON`)
   }
-  if (!Array.isArray(editors)) {
-    throw new HttpError(500, 'server_error', 'EDITOR_KEYS must be an array')
+  if (!Array.isArray(parsed)) {
+    throw new HttpError(500, 'server_error', `${label} must be an array`)
   }
+  return parsed as EditorKey[]
+}
+
+async function verifyKey(env: Env, key: string): Promise<string | null> {
+  const editors = [
+    ...parseEditorKeys(env.EDITOR_KEYS, 'EDITOR_KEYS'),
+    ...parseEditorKeys(env.EDITOR_KEYS_EXTRA, 'EDITOR_KEYS_EXTRA'),
+  ]
   for (const editor of editors) {
     if (!editor?.salt || !editor?.hash || !editor?.name) continue
     const hash = await sha256Hex(`${editor.salt}${key}`)
@@ -856,6 +866,9 @@ async function railConnections(
 function requireSecrets(env: Env): void {
   if (!env.SESSION_SECRET) {
     throw new HttpError(500, 'server_error', 'SESSION_SECRET is not configured')
+  }
+  if (!env.EDITOR_KEYS) {
+    throw new HttpError(500, 'server_error', 'EDITOR_KEYS is not configured')
   }
 }
 
